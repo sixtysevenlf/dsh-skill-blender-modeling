@@ -1164,6 +1164,25 @@ pack shape_method）不在代码里写死，而是从算子 RNA 读，传错会�
 ② 横向特征线（`x_mm` 给数值）要求该位置有站位，`vehicle_loft` 会自动插一个；
 ③ 折痕是 SubD 权重，**必须配 `subsurf>=1`** 才看得出效果；④ 凹陷 `inset_mm` 与 `band_mm` 决定折面强度与宽度。
 
+### Recipe 23 — 多步链一条命令跑完（pipe_run + @工件）
+
+```python
+# 以前：4 次工具调用，还要把上一步的 JSON 粘回下一步（vehicle_sections 的 stations 有 5,656 字符）
+# 现在：一次调用，产出用 @名字 传递
+#   blender_rt_plan(op="pipe_run", args={"steps":[
+#       {"api":"vehicle", "op":"sections", "args":{"side":"D:/out/car_side.png", "front":"D:/out/car_front.png", "mm_per_px":10.0}, "out":"@sec"},
+#       {"api":"vehicle", "op":"loft", "args":{"stations":"@sec.stations", "section_shape":"@sec.section_shape", "name":"GEO-shell"}, "out":"@shell"},
+#       {"api":"vehicle", "op":"panels", "args":{"object_name":"@shell.object", "cuts_mm":[1500,3000], "gap_mm":4}, "out":"@panels"},
+#       {"api":"clearance", "op":"check", "args":{"pairs":[{"id":"seam", "a":["@panels.parts.0"], "b":["@panels.parts.1"], "min_mm":0}]}}
+#   ]})
+#   → 逐步回执 ok/ms/keys/stored；失败默认即停
+# 工件也能手工存：pipe_put(name="my_nums", value={...}) → 后续步骤写 "@my_nums"
+# 查看/清理：pipe_list / pipe_get(name, path="a.b") / pipe_clear
+```
+
+**硬规则**：① `@引用` 只在 `pipe_run` 内解析（单发 op 不会自动解引用）；② 引用不存在会当场报错并列出现有工件名；
+③ 工件活在当前 Blender 会话；④ 长任务仍走 `rt_job`/headless，`pipe_run` 是同步串行。
+
 ## 4. 六条必踩的坑
 
 ### 4.0 六条坑怎么分流（P2-3：能机械判定的交给门，不能的写进 checklist）
