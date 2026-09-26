@@ -339,6 +339,32 @@ err ≈ Δz / (D + Δz)      # D = 相机到近处标尺的距离，Δz = 两点
 
 **怎么验**：一次迭代里"取图次数 ≤ 实际改动次数"（每个新 hash 最多看一次）；验收期每张对照图的 `max_size=900` 且机位与 `spec.py` 里那组数逐字一致。
 
+## 0.7 建模类型 → 工具指路（★ 动手前先查这张表）
+
+**先查类型，再查能力族**：`blender_rt_plan(op="catalog", args={classes:true})` 一次拿全部 12 类
+（第一步 / 算子链 / 禁止自造 / 验收门）；单类 `args={class:"recon"}`。本表是同一份数据的人读版。
+
+| 建模类型 | 第一步 | 算子链 | 禁止自造 | 验收门 |
+|---|---|---|---|---|
+| 参考图还原（有外轮廓的物体） | `shape_plan(object_class=…)` | `img_rectify → shape_sections → shape_loft`（要改数字用 `shape_fit`）`→ crease_lines/inset_lines → shape_regions/shape_panels → qc_render_views(ref_path=)` | 别自造放样、别手算站表（自造 = 一张连续光滑面，没棱没缝） | 比例门 + 三视图 IoU + 板缝/特征线计数 > 0 |
+| 分面硬表面（装甲/军模/板件） | Recipe 2a | 基本体/板件 + 布尔 → `bevel`（2–3 段、保硬边）→ `audit_mesh` | 别用 SubSurf 抹平棱；别靠缩放假装板缝 | 锐边/法线 + 板缝可见 + 无浮块 |
+| 光滑硬表面（钣金/圆润道具） | Recipe 2b | 基本体 → Bevel(2) → SubSurf(2) 或 `crease_lines(radius_mm=…)` → `audit_mesh` | 别手推顶点做曲率；别用 shade smooth 假装圆角 | 无褶皱/自交 + 特征线 > 0 |
+| 有机 / 角色 / 道具 | `sculpt_scan` | `sculpt_setup(VOXEL) → sculpt_apply(brush…) → sculpt_filter/remesh → audit_connectivity` | 别用布尔拼体积；无头别试 `bpy.ops.sculpt.brush_stroke` | 连通 = 1 + 包络 + 法线朝外 |
+| 重复阵列（履带/链节/散热片） | `generator_save` 或 Recipe 6b | `generator_run(args=…)` 或 Array+Curve → `audit_interference` | 别复制粘贴硬编码件（改参要改码） | 件数/节距/间隙门 + 零互穿 |
+| 布尔开孔（轮眉/散热孔/减重孔） | `destructive_guard` | 布尔 → `fix_repair` → `audit_interference` | 别在未判别的连接上布尔 | 零互穿 + 零面积面 = 0 |
+| 人形素体 / 头型 | `human_*`（Recipe 15/16） | 素体/头型 → `sculpt_*` 细修 → `audit_mesh` | 别自造人体比例表 | 比例表 + 连通 = 1 |
+| 管路 / 线缆 / 轨道 / 护栏 | `sweep_analyze` | `sweep_build` → `audit_connectivity` | 别手接路径段 | 弯折半径 > 型材半宽 |
+| 旋转体（瓶/罐/轮毂/花瓶/喷口） | `shape_plan(object_class="rotational")` | `shape_revolve(parts=[…])` → `print_report` → `material_*` | 别放样 —— 轴对称走放样是错的路径 | 回转轴向偏差 + 壁厚 |
+| 板件/型材/翼型（有弯度或不对称） | `shape_plan(object_class="aircraft"/"hull")` | `shape_sections → section_outline`（或超椭圆 + 特征线）`→ shape_loft` | 别用左右镜像表达弯度（翼型必选 `section_outline`） | 剖面偏差 + IoU + 特征线 |
+| 装配 / 机构 / 铰接 | `gate_plan(preset="assembly")` | `mate_check/fit_help → motion_joints → motion_measure → motion_export_urdf`；总验收 `gate_run(spec_path=…)` | 别自写验收判据 | `gate_run` 的 verdict 三态（degraded ≠ 通过） |
+| 打印可行性 / 交付 | `print_report` | `uv_* → material_* → material_bake → deliver_export → deliver_verify` | 别手写导出、别只交 .blend | manifest md5 + `resolution_mm` 警告 + UV 零面积面 = 0 |
+
+**三条硬规则**（都是实测踩出来的，不是洁癖）：
+
+1. **有参考图就必须先用 `shape_plan` 拿 `section_path`** —— 截面通路选错（该 `section_outline` 却用镜像对称）是**系统性失真**，不是细节问题；
+2. **车壳/外壳类禁止自造放样** —— 自造只能出一张连续光滑面；板缝与棱线必须靠 `vehicle_panels` + `crease_lines` / `inset_lines`（Recipe 22）；
+3. **验收一律用机械门**（§6 数值门 + `gate_run` 三态）—— "看起来像"不算通过，`degraded` 也不算通过。
+
 ## 1. 六步总纲
 
 ```
