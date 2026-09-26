@@ -238,10 +238,28 @@ cutter.hide_viewport = True
 | **Triangulate** | Force triangles | For game engines |
 | **Edge Split** | Force sharp edges in shading | Where sharp is needed |
 
-**Standard hard-surface stack order**:
-```
-Mirror → Array → Solidify → Bevel → Subdivision Surface → (Boolean if needed)
-```
+**Stack order is intent-driven — there is no single "standard" chain** (corrected locally, see `SKILL.md` §5):
+
+The commonly quoted chain `Mirror → Array → Solidify → Bevel → Subdivision Surface → (Boolean)`
+is **not** a universal rule. Reordering two entries of the same stack changes both topology and size —
+measured on one 1 m cube (Blender 5.2.2):
+
+| Order | verts / faces | bbox longest edge |
+|---|---|---|
+| Bevel(0.2/2) → SubSurf(2) | 866 / 864 | 0.9904 m |
+| SubSurf(2) → Bevel(0.2/2) | 98 / 96 | 0.8395 m |
+
+Order by **goal**, then verify with the evaluated mesh (`verts` / `faces` / `bbox`):
+
+| Goal | Relative order | Why |
+|---|---|---|
+| Seamless mirrored part | Mirror first, Bevel/SubSurf after | Weld the mirror seam into one surface before beveling/subdividing |
+| Each array instance carries its own bevel | Bevel first, Array after | Later modifiers only copy the result of earlier ones |
+| Rounded edges on a shell | Solidify first, Bevel after | You need thickness before there is a solid edge to bevel |
+| Smooth surface that keeps creases | Bevel first, SubSurf after | Bevel supplies the support edges |
+| Faceted hard surface (armour panels) | **No SubSurf at all** | SubSurf rounds every crease away — use a small Bevel + flat shading |
+| Boolean cut | Keep Boolean late / apply before export | Keep it non-destructive; n-gons affect later SubSurf |
+| Topology change | Apply Mirror before changing topology | Otherwise seam alignment is no longer guaranteed |
 
 ---
 
@@ -254,7 +272,7 @@ Mirror → Array → Solidify → Bevel → Subdivision Surface → (Boolean if 
 | N-gons after Boolean | Subsurf pinches | Apply Bool, clean up to quads, then SubSurf |
 | Inverted normals | Black faces in render | `Mesh → Normals → Recalculate Outside` |
 | Symmetry breaks (left ≠ right) | Mirror modifier wasn't applied/used | Use Mirror modifier with X clipping enabled |
-| Mesh has hidden geometry | Internal faces from extrude mistakes | Select all → `Mesh → Clean Up → Delete Loose` |
+| Mesh has hidden geometry (buried/internal faces) | Leftover walls from extrude/join/Boolean | **NOT `Delete Loose`** — it removes only vertices/edges with no face, **zero faces** (measured: `Removed: 0 vertices, 0 edges, 0 faces`). Overlapping joined shells → Boolean UNION; Boolean debris → `EXACT` solver or `fix_repair`. `mesh.select_interior_faces()` also selects 0 on joined shells. See `SKILL.md` §5.1 |
 | Too many vertices for game engine | Game LODs limited | Decimate modifier or manual retopology |
 
 ---
