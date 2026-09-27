@@ -369,6 +369,33 @@ err ≈ Δz / (D + Δz)      # D = 相机到近处标尺的距离，Δz = 两点
 2. **车壳/外壳类禁止自造放样** —— 自造只能出一张连续光滑面；板缝与棱线必须靠 `vehicle_panels` + `crease_lines` / `inset_lines`（Recipe 22）；
 3. **验收一律用机械门**（§6 数值门 + `gate_run` 三态）—— "看起来像"不算通过，`degraded` 也不算通过。
 
+### 0.71 调用约定 · 离线逃生口（S9 补）
+
+**API 两种调用形态（返回类型不同，别混）**：
+
+```python
+api = K.dsh_audit_api            # 或 K.dsh_kit.kapi("audit")（找不到会列出已加载模块）
+r1 = api("scene", {...})         # → **dict**（已解析；文档/skill 示例都是这种）
+r2 = api["dispatch"]("scene", json.dumps({...}))   # → **JSON 字符串**（引擎契约；要自己 json.loads）
+```
+
+- 你自己的 `lib/*.py` 里想用 `K`：K 只注入「被执行脚本的 globals」⇒ **import 进来的模块有自己的 globals**。两种官方写法：
+  `import sys; K = sys.modules["dsh_rt_kernel"]`（一行）或 `K.dsh_kit.install_kernel()`（把 K 与 kapi 装进调用方 globals）。
+- `preload` 用 **runtime/<name>.py 的文件名**（如 `preload="vehicle,audit"`）；写错会报错并列出可用模块名。
+
+**离线逃生口（后端挂了也能干活）**：
+
+```bash
+blender -b --factory-startup --python runtime/offline_bootstrap.py -- vehicle audit qc
+```
+
+或脚本里 `import offline_bootstrap as ob; ns = ob.boot(["vehicle","audit"]); ns["kapi"]("vehicle")("spec", {...})`。
+契约与在线路径**完全一致**（同一个 `K.dsh_<name>_api`）。
+
+**`audit_gate` / `audit_connectivity` 的口径（装配必读）**：默认判据是**「单体船」**（`micro_gap_mm` 默认 0.3 mm）——
+222 个独立零件的**正常**装配必然被报成"可见浮块"。多零件请二选一：① 调 `micro_gap_mm`（带设计间隙的装配 1–2 mm）；
+② 走 `gate_plan(preset="assembly")` → `gate_run`，别拿单体口径当装配门。
+
 ## 1. 六步总纲
 
 ```
