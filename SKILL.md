@@ -138,7 +138,7 @@ fingerprint.digest=<12 位>
 
 > ⚠ **三态别读成二态（v0.9.6）**：`audit_*` 顶层现在给 `state`（= `verdict`）三态 ——
 > `pass` / `fail`（确有缺陷）/ `degraded`（**没查完或判不出来**）。`clean` 收紧为"**查完了而且没缺陷**"：
-> 自交检查被跳过或抛异常、`normals_state=unknown`、超面数上限的逐壳分析，都会给 `clean=false` + `state=degraded`。
+> 自交检查被跳过或抛异常、`normals_state=unknown`、（**显式设了上限时**）超面数上限的逐壳分析，都会给 `clean=false` + `state=degraded`；默认不设上限、全跑。
 > ⇒ **`clean=false` 有两种成因**（确有缺陷 / 没查完），必须看 `state` 与 `reason` 才下结论；
 > `degraded` 的处置是**补查**（见下），不是"勉强算过"。
 
@@ -1384,7 +1384,7 @@ def normal_health(obj, probe_point=None):
    |---|---|---|
    | `pass` | 每个壳都"可确证是独立实体"且朝外；合法嵌套空腔标 `nested` 豁免（负体积不误报） | 记入回执 |
    | `fail` | 至少一个**非嵌套**壳闭合、绕向一致、`signed_volume < 0` | 先 recalc 再复检 |
-   | `unknown` | 判不出来：壳的 AABB 相交但无法确证嵌套/空腔（互穿、部分重叠、重合副本）、闭合/绕向/体积不可判、或面数超过逐壳分析上限 | **不给 pass**：无其它缺陷时 `state=degraded`，同时有缺陷（如互穿被抓成自交）时 `state=fail` ⇒ **补查**（`normals_reason` 给原因；大网格可用 env `DSH_SHELL_MAX_FACES` 放宽），**不要**下"没问题"结论 |
+   | `unknown` | 判不出来：壳的 AABB 相交但无法确证嵌套/空腔（互穿、部分重叠、重合副本）、闭合/绕向/体积不可判、或（显式设了上限时）面数超过逐壳分析上限 | **不给 pass**：无其它缺陷时 `state=degraded`，同时有缺陷（如互穿被抓成自交）时 `state=fail` ⇒ **补查**（`normals_reason` 给原因；大网格可用 env `DSH_SHELL_MAX_FACES` 放宽），**不要**下"没问题"结论 |
    | `n/a` | 网格未闭合（`closed=false`），"整体朝向"无意义 | 先闭合，或对有意的开口件只按口部法线单独核对 |
 
 ### 坑六：给 agent 用的预览装置，默认必须看得清几何突变
