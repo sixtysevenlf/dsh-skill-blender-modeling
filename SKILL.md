@@ -51,6 +51,10 @@ license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，�
 
 ## 0.5 多 Agent 并行建模的分工范式（★ 做大件必读）
 
+**派子代理前（必做）**：子代理看不到你读过的目录 —— 把 `blender_rt_plan(op="catalog", args={handoff:true})` 的输出
+**原样粘进它的提示词**（≈2.5 KB：15 个工具 + 12 类建模的第一步/禁止自造 + 三条硬规则）。
+不粘的实测后果：子代理直接写 Python 自造放样、自写判据，插件的 vehicle_*/shape_* 全白给。
+
 > 单人单线捏一个物体，配方够用；**造一台机器**（几百个对象、多个 builder）时，决定成败的不是捏形状，而是**分工协议**。
 > M1A1 实测：500 对象 / 7 个 agent，**装配质量几乎全靠这一章**。
 
