@@ -1,6 +1,6 @@
 ---
 name: blender-modeling
-description: Blender 建模流程与装配教程——先按决策树选形（分面硬表面 / 光滑硬表面 / 有机 / 重复阵列 / 布尔），再走流水线（冻结规格 → 场景准备 → Blockout → 粗形精修 → 修改器栈 → 清理 → 交接），配 23 个编号配方（含 2a/2b/3b/6b 变体；基本体 / 分面装甲板 / Bevel+SubSurf 光滑栈 / bmesh 编辑 / 布尔开孔 / 镜像 / Array 沿曲线 / 参数化销轴弦长节距阵列 / 装配审计门 / 固定机位对照验收 / 程序化雕刻 / 网格修复 / 打印检查 / 沿路径扫掠 / 人形素体 / 头型 / 车辆与参考图放样 / 照片校正 / 折线族拟合 / 特征线层 / 多步链 pipe_run），覆盖六条必踩的坑（长轴·宽轴·薄轴语义、可视拼接用隐藏交叠并按项目 spec 复核而非固定倍数/不由可视脚本裁定结构连接、收尖压中线再合并、headless 慎用 bpy.ops、法线方向是一切穿模判据的前提、预览装置默认光照要看得清板缝），并含多 Agent 并行建模的分工范式（冻结 spec.py / 写作用域协议 / 接口表 / 隐藏交叠+复检 / 数值门装配审计 / 归属标签与可并行性判据）与参考图驱动的形体还原（三视图标定 + 双证据验收 + IoU 只是单视轮廓必要条件 / 单应只校正一个平面 / 跨深度误差按 Δz/(D+Δz) 算），以及交接前必跑清单与可复制的验收回执、参数块+生成脚本（generator_*）、本机 blender_rt_* 直连通道语义。用于「做一个 / 建一个 / 捏一个 3D 物体」「加个立方体 / 球 / 圆柱」「挤出 / 内插 / 倒角这个面」「加个修改器」「挖个洞」「做个剑 / 椅子 / 门」等几何创建与网格编辑请求，也用于「多个 agent 分工造一台机器」「按参考图还原外形 / 量比例」「装配体检：查穿模 / 浮空 / 按 spec 复核隐藏交叠量」等大件建模与装配任务。
+description: Blender 建模流程与装配教程——先按决策树选形（分面硬表面 / 光滑硬表面 / 有机 / 重复阵列 / 布尔），再走流水线（冻结规格 → 场景准备 → Blockout → 粗形精修 → 修改器栈 → 清理 → 交接），配 23 个编号配方（含 2a/2b/3b/6b 变体；基本体 / 分面装甲板 / Bevel+SubSurf 光滑栈 / bmesh 编辑 / 布尔开孔 / 镜像 / Array 沿曲线 / 参数化销轴弦长节距阵列 / 装配审计门 / 固定机位对照验收 / 程序化雕刻 / 网格修复 / 打印检查 / 沿路径扫掠 / 人形素体 / 头型 / 车辆与参考图放样 / 照片校正 / 折线族拟合 / 特征线层 / 多步链 pipe_run），覆盖六条必踩的坑（长轴·宽轴·薄轴语义、可视拼接用隐藏交叠并按项目 spec 复核而非固定倍数/不由可视脚本裁定结构连接、收尖压中线再合并、headless 慎用 bpy.ops、法线方向是一切穿模判据的前提、预览装置默认光照要看得清板缝），并含多 Agent 并行建模的分工范式（冻结 spec.py / 写作用域协议 / 接口表 / 隐藏交叠+复检 / 数值门装配审计 / 归属标签与可并行性判据）与参考图驱动的形体还原（三视图标定 + 双证据验收 + IoU 只是单视轮廓必要条件 / 单应只校正一个平面 / 跨深度误差按 Δz/(D+Δz) 算），以及交接前必跑清单与可复制的验收回执、参数块+生成脚本（generator_*）、本机 blender_rt_* 直连通道语义，以及渲染/动画/长活的取景投影自检、可续跑长活、渲染耗时实测口径与 Blender 5.2 API 变更（§6.5）。用于「做一个 / 建一个 / 捏一个 3D 物体」「加个立方体 / 球 / 圆柱」「挤出 / 内插 / 倒角这个面」「加个修改器」「挖个洞」「做个剑 / 椅子 / 门」等几何创建与网格编辑请求，也用于「多个 agent 分工造一台机器」「按参考图还原外形 / 量比例」「装配体检：查穿模 / 浮空 / 按 spec 复核隐藏交叠量」等大件建模与装配任务。
 license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，见 NOTICE.md）
 ---
 
@@ -19,6 +19,12 @@ license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，�
 > §0.6.1 扩成**三视图联立标定**（P1-3，脚本见 `references/multiview-calibration.md`）·
 > §0.5.7 增**可并行性判据 + 归属标签 + 单 builder 回滚**（P1-5）· §3.0 增**参数块 + 生成脚本**（P1-4）·
 > §4.0 增**六条坑分流 + 写代码前 checklist**（P2-3）。逐条对照见 §10。
+>
+> **v7 · 2026-09-30**：按《QBZ-191 全程分解视频》实测补 **§6.5 渲染 / 动画 / 长活**（全新一节，
+> §0–§6 流程骨架不动）。起因：该项目几何阶段 138 件一次过网格门（8 个计数全 0），
+> 而**渲染阶段返工两轮**——取景按 AABB 估（3/4 视角全切边）、改 `location` 没刷依赖图（差 2.2 倍）、
+> 居中解符号写反（发散到 1e15）、米/毫米混算。修法全部落成可复制的自检代码。
+> 同时**修正 §0.5.5 的一处错口径**：`audit_mesh` **不吃 `file=`**（原文误列，4 个 agent 独立踩过）。
 
 先定形状，再走流程，改一步看一眼。**不要一口气写完整个模型再回来看**——每一步都要有画面或数字证据。
 
@@ -112,8 +118,16 @@ INTERFACES = [                                                # 接口表：拼�
 
 - 单件自证 ⇒ `audit_mesh`（门①–④）；装配口径 ⇒ `audit_gate`（门⑥）。
 - 命令原样：见 **§6.1**（三条必跑）；字段判据：见 **§6** 表。
-- 跨文件批处理：`audit_mesh` / `audit_gate` / `audit_measure` 收 `args={"file": "D:/.../parts/hull.blend"}`，
-  `audit_interference` 收 `file_a` / `file_b`。
+- 跨文件批处理：**只有** `audit_connectivity` / `audit_gate` / `audit_measure` / `audit_overlap` /
+  `audit_interference` 收 `args={"file": "D:/.../parts/hull.blend"}`（后两者用 `file_a` / `file_b`）。
+  ⚠ **`audit_mesh` 不吃 `file=`** —— 传了会当场被拒：
+  `参数不匹配: audit_mesh() got an unexpected keyword argument 'file'`（实测 2026-09-30，**4 个 agent 独立踩过**）。
+  要对**另一个 .blend** 里的件跑单件自证，只有这一条路：
+  ```python
+  bpy.ops.wm.open_mainfile(filepath=PATH)          # 先真的打开它
+  K.dsh_audit_api("mesh", {"objects": [...], "self_intersect": True})
+  ```
+  headless 里记得 `preload="audit"`（否则 `K.dsh_audit_api` 不存在，见 §6.5.6）。
 
 **验收回执模板**（复制进交付清单；数字必须来自回执**原文**，不许转述、不许手写）：
 
@@ -1585,6 +1599,193 @@ blender_rt_plan(op="audit_scene", args={"summary_only": True, "top_k": 10, "self
    装配级的 `audit_connectivity` / `audit_gate` / `audit_measure` / `audit_interference` 走**求值网格**（Boolean 未 Apply 也算数）。要拿 `audit_mesh` 判"改完没有"，先 apply 掉相关修改器。
 2. `ok=false` / `analyzed=false` / `state="degraded"` **都不是通过** —— 那是"没跑"或"没分析完"，不能读成"没问题"。
 3. **`clean=false` 有两种成因**：`state=fail`（确有缺陷，看 `totals` 里非 0 的计数字段）或 `state=degraded`（没查完/判不出来：自交被跳过或抛异常、`normals_state=unknown`、逐壳分析超面数上限）。拿到 `clean=false` **先读 `state`**，再决定"改几何"还是"补查"。
+
+## 6.5 渲染 / 动画 / 长活（★ v7 新增，按《QBZ-191 全程分解视频》实测补）
+
+> §0–§6 管的是**形状对不对**；这一节管**画面对不对、活跑不跑得完**。
+> 两者的失败模式完全不同，而且渲染阶段的坑**更隐蔽**：
+> 几何错了 `audit_mesh` 会红；**取景错了它只会安静地给你一张切边的图**。
+
+### 6.5.1 取景：不许用包围盒估算，必须逐帧投影自检 ★本节最高价值
+
+**实测事故（QBZ-191 爆炸图，返工 2 轮）**：
+
+| 症状 | 根因 |
+|---|---|
+| 4 张爆炸图全部切边 | 拿轴对齐 AABB 的 `dx/dy/dz` 估相机距离 —— **3/4 视角的投影范围与这三个数无关** |
+| 取景差 **2.2 倍** | 改了 `obj.location` 却没刷依赖图 ⇒ `bounds_all()` 读到**爆炸前**的矩阵（按 949 mm 取景，实际 2129 mm） |
+| 迭代发散到 `dist=6.1e15` | 手动解的**居中项符号写反**（该加不是减） |
+| 同样发散 | 顶点抽样是**米**、包围盒是**毫米**，两者混算 |
+
+**通则一：相机距离/视点一律按"投影后"的画面范围解，不按 AABB 解。**
+
+```python
+def cam_basis(direction):                       # d = 目标->相机；fwd = -d
+    d = Vector(direction).normalized(); fwd = -d
+    up = Vector((0, 0, 1))
+    if abs(fwd.dot(up)) > 0.995: up = Vector((0, 1, 0))
+    Z = -fwd
+    Y = (up - Z * up.dot(Z)).normalized()
+    X = Y.cross(Z).normalized()
+    return d, fwd, X, Y, Z
+
+def fit_view(bb, direction, lens=70, res=(1920, 1080), margin=1.18, points=None, iters=40):
+    d, fwd, X, Y, Z = cam_basis(direction)
+    tan_h = (36.0 / 2) / lens                                     # sensor 36mm
+    tan_v = tan_h * (res[1] / float(res[0]))
+    pts = points or [Vector((x, y, z)) for x in (bb[0], bb[1])
+                     for y in (bb[2], bb[3]) for z in (bb[4], bb[5])]
+    look = Vector(((bb[0]+bb[1])/2, (bb[2]+bb[3])/2, (bb[4]+bb[5])/2))
+    dist = max(bb[1]-bb[0], bb[3]-bb[2], bb[5]-bb[4]) * 1.8 + 1.0
+    target = 1.0 / margin
+    for _ in range(iters):
+        C = look + d * dist
+        k, nx, ny, behind = 0.0, [], [], False
+        for P in pts:
+            V = P - C; dep = V.dot(fwd)                            # 沿视线正方向的深度
+            if dep <= 1e-6: behind = True; break
+            ax = V.dot(X) / (dep * tan_h); ay = V.dot(Y) / (dep * tan_v)
+            nx.append(ax); ny.append(ay); k = max(k, abs(ax), abs(ay))
+        if behind: dist *= 1.8; continue                           # 角点跑到相机后面
+        dist *= (k / target) ** 0.85                               # nx,ny ∝ 1/dist
+        cxm = (min(nx)+max(nx))/2; cym = (min(ny)+max(ny))/2
+        look = look + X*(cxm*dist*tan_h) + Y*(cym*dist*tan_v)      # ★符号：加，不是减
+        if k <= target*1.002 and abs(cxm) < 0.004 and abs(cym) < 0.004: break
+    return dist, (look.x, look.y, look.z)
+```
+
+**通则二：摆好相机之后必须验，验的是"投影"，不是"看着差不多"。**
+
+```python
+# 逐帧取景自检：max NDC 必须 <= 1.0（=1.0 就是贴边）
+sc.frame_set(f); bpy.context.view_layer.update()        # ★不刷依赖图 = 读到旧矩阵
+mw = cam.matrix_world; C = mw.translation
+X = mw.col[0].to_3d().normalized(); Y = mw.col[1].to_3d().normalized()
+fwd = -mw.col[2].to_3d().normalized()
+tan_h = (36.0/2)/cam.data.lens; tan_v = tan_h*(RES[1]/float(RES[0]))
+for o in objs:
+    for v in [o.data.vertices[i] for i in range(0, len(o.data.vertices), 14)]:   # ★步长=14，与 fit_view 同口径
+        V = (o.matrix_world @ v.co) - C; dep = V.dot(fwd)
+        assert dep > 1e-4, "角点跑到相机后面"
+        worst = max(worst, abs(V.dot(X)/(dep*tan_h)), abs(V.dot(Y)/(dep*tan_v)))
+assert worst <= 1.0, "切边：worst NDC=%.3f" % worst
+```
+
+> ⚠ **抽样密度必须与 `fit_view` 一致**。我第一次自检只取每件 20 个点，测出 `0.737`，
+> 而真实值是 `0.847` —— **自检本身在骗我**。自检比被检对象松，等于没检。
+>
+> **实测口径**：静帧验收 `worst <= 1.0`；成片留白 `margin 1.12–1.24`（对应 `worst ≈ 0.80–0.89`）。
+
+**通则三：单位先统一。** `kit.bounds_all()` 回 **mm**，`matrix_world @ v.co` 是 **m** —— 混算就得到 `dist=6.1e15`。
+任何"顶点 / 包围盒"混用处先 `* 1000`。
+
+### 6.5.2 爆炸图 / 分解动画：位置、幅度、地板、顺序
+
+- **改了 `obj.location` 之后必须 `bpy.context.view_layer.update()`**，否则 `matrix_world` 还是旧的
+  （§6.5.1 事故 2 的根因）。对"每帧算包围盒"的动画尤其致命。
+- **幅度先定"总跨度"，再按比例分配每件位移**，不要逐件手调。目标 **≈1.4–1.6 倍物体长度**；
+  实测 2.2 倍（2129 mm vs 946 mm 枪长）时零件**小如星点**，统一缩放 0.42 → 1445×904 mm 才读得出骨架。
+- **地板会吃掉整个画面**：分解件下坠到摄影棚地板以下（实测 Z 到 −1146 mm）。
+  分解 / 内构镜头一律 `hide_render = True` 收起地板，用渐变世界当背景。
+- **必须有一个"基准件"不动**，给观众参照系（我是上机匣）。
+- **波次表里"具体名必须排在泛化名前"**：`bolt_carrier` / `bolt_cam_pin` / `bolt_catch` 都要排在 `bolt` 之前，
+  否则 `bolt` 会把它们全吃掉。同理 `buffer_tube` 必须在 `buffer` 前、`trigger_guard` 在 `trigger` 前。
+- **收尾必须打印未匹配清单**，`UNMATCHED []` 才算全件编排到了（否则会有件默默不动）。
+- **缓动**：机械感用 **ease-out**（`1-(1-u)**2.4`），分 8 段采样打关键帧，比默认 Bezier 更像"脱开"。
+
+### 6.5.3 长活（>2 min）：默认必须能被打断 ★
+
+**实测**：10 分钟渲染期间后端重启 ⇒ `blender_rt_job(op="wait")` 回 `Error: terminated`，
+作业变 `stale：pid 已不存在`。**这是常态，不是异常。**
+
+**规范（每条都省过时间）**：
+1. 输出按**帧号命名**落到固定 `outdir`（`seq_0001.png`）；
+2. 出图前 `if os.path.exists(p) and not FORCE: continue` —— **存在即跳过**；
+3. 提供 `--force` 重来。**"可续跑"是长活的第一属性，不是优化项** ——
+   实测 301 帧的视频补渲 1 帧用 **6 秒**，而不是重跑 10 分钟；
+4. 每 N 帧 print 进度 + **实测 s/帧 + ETA**；ETA 用**已渲帧数**算，不要用循环序号算（续跑时后者会骗你）；
+5. **草稿与终稿必须分目录**：否则"存在即跳过"会把 480p 草稿当成 1080p 成品帧；
+6. **作业句柄归属要认清**：`as_job=true` 回的是 **Blender 侧台账 id**，用 `blender_rt_job(op=wait/collect)` 收；
+   拿它去 DSH 的 `job_output` 会回 `unknown job`（两套注册表）。
+
+### 6.5.4 渲染耗时：先测 3 帧，再排期
+
+**实测模型**（Cycles/OptiX + 降噪，138 件 / 191k 面，全件每帧都在动，RTX 4060 Laptop）：
+
+| 分辨率 | 采样 | 秒/帧 |
+|---|---|---|
+| 1920×1080 | 64 | 1.78 |
+| 1920×1080 | 128 | 2.00 |
+| 1920×1080 | 256 | 2.50 |
+| 1920×1080 | 320 | 2.45 |
+| 3840×2160 | 320 | 9.71 |
+
+**关键结论：一帧里约 60% 是固定开销**（场景求值 + BVH 重建 + 降噪 + PNG 写盘）。
+所以 **"降采样省钱"几乎无效**（320 → 64 只省 30%），**真正的杠杆是帧数 = 时长 × 帧率**；
+分辨率接近像素数线性（4K ≈ 3.8 × 1080p）。**排期前先花 1 分钟渲 3 帧实测，不要套用别人的数字。**
+
+⚠ **`use_persistent_data` 在 Blender 5.2 挂在 `scene.render`，不在 `scene.cycles`。**
+包在 `try/except` 里会**静默失败**（我连续失败 **26 次**才发现）——
+**任何 setter 都不许静默失败，必须回读校验**（这是 §6 "静默空产出必须失败" 的同一条纪律）：
+
+```python
+sc.render.use_persistent_data = True
+assert sc.render.use_persistent_data is True, "没生效：属性可能在别的对象上"
+```
+
+### 6.5.5 视频：低帧率渲染 + 光流插值（省 3 倍，但必须先量帧间位移）
+
+**判据不是"我觉得能动"，是"每帧位移多少像素"**：
+
+```
+px_per_frame = 单件总行程_mm / (时长_s × 渲染帧率) ÷ (画面宽_mm / 画面宽_px)
+< 30 px/帧  ⇒ 光流插值基本无损
+> 80 px/帧  ⇒ 开始撕裂 / 重影
+```
+
+实测（1080p，画面宽 ≈1450 mm 映射 1920 px）：最猛的件 **17 px/帧** ⇒ 10 fps 渲、30 fps 出，安全。
+
+**必须做真值对照才算验收**：让渲染器把**"插值帧对应的真实时间轴帧"单独渲出来**当 ground truth，逐像素比。
+
+| 对比 | PSNR |
+|---|---|
+| 源帧直通（验证链路无损） | **51.6 dB** |
+| **插值帧 vs 真值** | **40.1 / 40.4 dB** |
+| 编码后解码帧 vs 源 PNG | 43.0 dB |
+
+残余误差集中在**高频边缘的亚像素混叠**（导轨齿、防滑纹）；**调大搜索窗口无改善**（40.13 → 40.20 dB）
+⇒ **这是低帧率采样的固有代价，不是参数问题，别再去调参**。3× 放大目视不可辨。
+
+```bash
+# 单镜头连续运动用 scd=none，别让场景切换检测误判成剪辑点
+ffmpeg -start_number 1 -framerate 10 -i seq_%04d.png \
+  -vf "minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1:scd=none" \
+  -fps_mode cfr -frames:v 900 -c:v libx264 -preset slow -crf 15 -pix_fmt yuv420p out.mp4
+```
+> ⚠ ffmpeg 7：`-vsync vfr` 与 `-r` 冲突（报 `One of -r/-fpsmax was specified together a non-CFR`），改 `-fps_mode cfr`。
+> ⚠ 时间轴要多留 3 帧，否则 30 fps 输出差 2 帧凑不满 30.000 s。
+
+### 6.5.6 Blender 5.2 API 变更（实测，会直接报错）
+
+| 症状 | 原因 | 改法 |
+|---|---|---|
+| `'Action' object has no attribute 'fcurves'` | 5.2 改 layered / slotted action | 不要遍历 `action.fcurves`；要控制缓动就**自己按缓动采样打关键帧** |
+| `bpy_prop_collection[slice]: slice steps not supported` | `vertices[::n]` 不支持步长切片 | `[o.data.vertices[i] for i in range(0, n, step)]` |
+| `CyclesRenderSettings has no attribute 'use_persistent_data'` | 属性移到 `scene.render` | 见 §6.5.4 |
+| `Scene.frame_set()` expected int, not float | 帧号必须整数 | `int(1 + round(t * fps))` |
+| GUI 里 `open_mainfile` 后见空网格 | 用的是"用户当前视口" | 传 `from=` / `look_at=` 走自定义视角 |
+| `module 'dsh_rt_kernel' has no attribute 'dsh_audit_api'` | 该模块**没被 preload 进内核** | `blender_rt_headless(..., preload="audit")`；或查已加载：`K.dsh_kit.kapi("audit")`（找不到会列出可用模块名） |
+
+### 6.5.7 渲染 / 动画的验收回执
+
+```text
+【渲染回执】<镜头名 / agent>   <ISO 时间>
+  取景    worst NDC = 0.804（<=1.0）   抽样=每 14 顶点   相机关键点 = 21
+  分辨率  1920x1080   采样 320   实测 2.02 s/帧   帧数 301   总耗时 605 s
+  连续性  全件已编排 UNMATCHED=[]   基准件 = upper_receiver（不动）
+  续跑    存在即跳过：本轮补渲 1 帧 / 6 s
+  ⚠ 不确定项：<如实列>
+```
 
 ## 7. 深水参考
 
