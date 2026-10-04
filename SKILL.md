@@ -1,6 +1,6 @@
 ---
 name: blender-modeling
-description: Blender 建模流程与装配教程——先按决策树选形（分面硬表面 / 光滑硬表面 / 有机 / 重复阵列 / 布尔），再走流水线（冻结规格 → 场景准备 → Blockout → 粗形精修 → 修改器栈 → 清理 → 交接），配 23 个编号配方（含 2a/2b/3b/6b 变体；基本体 / 分面装甲板 / Bevel+SubSurf 光滑栈 / bmesh 编辑 / 布尔开孔 / 镜像 / Array 沿曲线 / 参数化销轴弦长节距阵列 / 装配审计门 / 固定机位对照验收 / 程序化雕刻 / 网格修复 / 打印检查 / 沿路径扫掠 / 人形素体 / 头型 / 车辆与参考图放样 / 照片校正 / 折线族拟合 / 特征线层 / 多步链 pipe_run），覆盖六条必踩的坑（长轴·宽轴·薄轴语义、可视拼接用隐藏交叠并按项目 spec 复核而非固定倍数/不由可视脚本裁定结构连接、收尖压中线再合并、headless 慎用 bpy.ops、法线方向是一切穿模判据的前提、预览装置默认光照要看得清板缝），并含多 Agent 并行建模的分工范式（冻结 spec.py / 写作用域协议 / 接口表 / 隐藏交叠+复检 / 数值门装配审计 / 归属标签与可并行性判据）与参考图驱动的形体还原（三视图标定 + 双证据验收 + IoU 只是单视轮廓必要条件 / 单应只校正一个平面 / 跨深度误差按 Δz/(D+Δz) 算），以及交接前必跑清单与可复制的验收回执、参数块+生成脚本（generator_*）、本机 blender_rt_* 直连通道语义，以及渲染/动画/长活的取景投影自检、可续跑长活、渲染耗时实测口径与 Blender 5.2 API 变更（§6.5）。用于「做一个 / 建一个 / 捏一个 3D 物体」「加个立方体 / 球 / 圆柱」「挤出 / 内插 / 倒角这个面」「加个修改器」「挖个洞」「做个剑 / 椅子 / 门」等几何创建与网格编辑请求，也用于「多个 agent 分工造一台机器」「按参考图还原外形 / 量比例」「装配体检：查穿模 / 浮空 / 按 spec 复核隐藏交叠量」等大件建模与装配任务。
+description: Blender 建模流程与装配教程——先按决策树选形（分面硬表面 / 光滑硬表面 / 有机 / 重复阵列 / 布尔），再走流水线（冻结规格 → 场景准备 → Blockout → 粗形精修 → 修改器栈 → 清理 → 交接），配 24 个编号配方（含 2a/2b/3b/6b 变体；基本体 / 分面装甲板 / Bevel+SubSurf 光滑栈 / bmesh 编辑 / 布尔开孔 / 镜像 / Array 沿曲线 / 参数化销轴弦长节距阵列 / 装配审计门 / 固定机位对照验收 / 程序化雕刻 / 网格修复 / 打印检查 / 沿路径扫掠 / 人形素体 / 头型 / 车辆与参考图放样 / 照片校正 / 折线族拟合 / 特征线层 / 多步链 pipe_run / 参数搜索内环），覆盖六条必踩的坑（长轴·宽轴·薄轴语义、可视拼接用隐藏交叠并按项目 spec 复核而非固定倍数/不由可视脚本裁定结构连接、收尖压中线再合并、headless 慎用 bpy.ops、法线方向是一切穿模判据的前提、预览装置默认光照要看得清板缝），并含多 Agent 并行建模的分工范式（冻结 spec.py / 写作用域协议 / 接口表 / 隐藏交叠+复检 / 数值门装配审计 / 归属标签与可并行性判据）与参考图驱动的形体还原（三视图标定 + 双证据验收 + IoU 只是单视轮廓必要条件 / 单应只校正一个平面 / 跨深度误差按 Δz/(D+Δz) 算），以及交接前必跑清单与可复制的验收回执、参数块+生成脚本（generator_*）、本机 blender_rt_* 直连通道语义、参数搜索内环（`blender_rt_loop`：目标 + 区间 → 搜索，收敛后必须换通路复核），以及渲染/动画/长活的取景投影自检、可续跑长活、渲染耗时实测口径与 Blender 5.2 API 变更（§6.5）。用于「做一个 / 建一个 / 捏一个 3D 物体」「加个立方体 / 球 / 圆柱」「挤出 / 内插 / 倒角这个面」「加个修改器」「挖个洞」「做个剑 / 椅子 / 门」等几何创建与网格编辑请求，也用于「多个 agent 分工造一台机器」「按参考图还原外形 / 量比例」「装配体检：查穿模 / 浮空 / 按 spec 复核隐藏交叠量」等大件建模与装配任务。
 license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，见 NOTICE.md）
 ---
 
@@ -34,6 +34,7 @@ license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，�
 |---|---|---|
 | **拉起 Blender（GUI 会话）** | `blender_viewport(op="launch")` | **v0.9.4 起 agent 能自己点亮 GUI**：写 boot 脚本（GUI 里 enable addon → 起 socket server）→ detached spawn blender.exe → **轮询 9876 端口**（唯一可信判据）→ 顺手 doctor；幂等（已在监听只回 already，不会堆出第二个 Blender）。参数：wait_ms / file / exe / addon_module / addon_file / dry_run |
 | 迭代建模、改一步看一眼 | `blender_rt_do` | **常驻 GUI 会话 + 持久内核 K**：整步约 105ms，变量**跨调用保留**；可选立刻回一帧 |
+| **参数搜索 / 拟合 / 反推尺寸**（要试几十~几千组参数、让某个误差最小） | `blender_rt_loop` | **搜索跑在 Blender 侧（160 tick/s），不花模型回合**：`spec={setup,step,measure,iterations,budget_ms,…}`，setup/step/measure 共享 `ns`，`measure` 必须给 `ns["score"]`（现成目标函数 `K.dsh_measure`：`silhouette_iou` / `aabb_err` / `profile_err`）；**只在 GUI 会话有效**（无头下 timers 不触发）；`op=board` 看候选 → `op=export` 落可复现脚本 → **换通路复核**（Recipe 24）；**不想手写 spec 就用 `blender_rt_plan(op="shape_search", args={objective, params, apply})`** —— 声明式「目标 + 区间」，内部跑同一条内环 |
 | 批处理 / 重活（**第一路径**） | `blender_rt_headless` | **每次都是全新 Blender 进程**（blender -b）：变量**不保留**，每次重新 import；shots 参数可一次出多视角；引擎默认 EEVEE + 光追 |
 | 跑很久的活 | `blender_rt_job` | 作业层：op=start / **wait** / status / collect；日志落 `jobs/<id>/`；超时不丢结果（回 promoted + jobId） |
 | 反复跑同一个脚本 | `blender_rt_worker` | 热无头会话：冷启动 + EEVEE 着色器编译只付一次。**单例串行** → 多 agent 并行时**不要共用**（会互相串场景） |
@@ -61,7 +62,7 @@ license: MIT（融合自 RobLe3/cc-blender-skill 与 arjun988/blender-skills，�
 ## 0.5 多 Agent 并行建模的分工范式（★ 做大件必读）
 
 **派子代理前（必做）**：子代理看不到你读过的目录 —— 把 `blender_rt_plan(op="catalog", args={handoff:true})` 的输出
-**原样粘进它的提示词**（≈2.5 KB：15 个工具 + 12 类建模的第一步/禁止自造 + 三条硬规则）。
+**原样粘进它的提示词**（≈2.5 KB：15 个工具 + 12 类建模的第一步/禁止自造 + 四条硬规则）。
 不粘的实测后果：子代理直接写 Python 自造放样、自写判据，插件的 vehicle_*/shape_* 全白给。
 
 > 单人单线捏一个物体，配方够用；**造一台机器**（几百个对象、多个 builder）时，决定成败的不是捏形状，而是**分工协议**。
@@ -380,11 +381,12 @@ err ≈ Δz / (D + Δz)      # D = 相机到近处标尺的距离，Δz = 两点
 | 装配 / 机构 / 铰接 | `gate_plan(preset="assembly")` | `mate_check/fit_help → motion_joints → motion_measure → motion_export_urdf`；总验收 `gate_run(spec_path=…)` | 别自写验收判据 | `gate_run` 的 verdict 三态（degraded ≠ 通过） |
 | 打印可行性 / 交付 | `print_report` | `uv_* → material_* → material_bake → deliver_export → deliver_verify` | 别手写导出、别只交 .blend | manifest md5 + `resolution_mm` 警告 + UV 零面积面 = 0 |
 
-**三条硬规则**（都是实测踩出来的，不是洁癖）：
+**四条硬规则**（都是实测踩出来的，不是洁癖）：
 
 1. **有参考图就必须先用 `shape_plan` 拿 `section_path`** —— 截面通路选错（该 `section_outline` 却用镜像对称）是**系统性失真**，不是细节问题；
 2. **车壳/外壳类禁止自造放样** —— 自造只能出一张连续光滑面；板缝与棱线必须靠 `vehicle_panels` + `crease_lines` / `inset_lines`（Recipe 22）；
 3. **验收一律用机械门**（§6 数值门 + `gate_run` 三态）—— "看起来像"不算通过，`degraded` 也不算通过。
+4. **要试几十~几千组参数才收敛的任务，不许手工拍参数** —— 目标能写成一个数（轮廓 IoU / 包围盒尺寸误差 / 剖面差）且**在 GUI 会话里**，就交给内环（Recipe 24）：搜索跑在 Blender 侧、不花模型回合；收敛后**必须换一条通路复核**（`qc_render_views` + `audit_measure` + `blender_rt_see`），别把 `op="board"` 的 best 当验收。
 
 ### 0.71 调用约定 · 离线逃生口（S9 补）
 
@@ -1257,6 +1259,73 @@ pack shape_method）不在代码里写死，而是从算子 RNA 读，传错会�
 **硬规则**：① `@引用` 只在 `pipe_run` 内解析（单发 op 不会自动解引用）；② 引用不存在会当场报错并列出现有工件名；
 ③ 工件活在当前 Blender 会话；④ 长任务仍走 `rt_job`/headless，`pipe_run` 是同步串行。
 
+### Recipe 24 — 参数搜索：手工拍参数 → 内环（`blender_rt_loop`）
+
+**三条同时成立才用它**：① 目标能写成一个数（轮廓 IoU / 包围盒尺寸误差 / 剖面差）——越小越好或越大越好都行；
+② 要试的参数组合是几十~几千组（手工一轮轮改 = 几十个模型回合）；③ **在 GUI 会话里**（无头下 `bpy.app.timers` 不触发，内环一次都不会跑）。
+
+```python
+# ① 先量基线（内环只优化你写的 score：不量基线，收敛了也不知道好了多少）
+#   blender_rt_plan(op="qc_render_views", args={"views":["right"], "ortho":true, "ref_path":"D:/ref/side.png"})  → IoU
+
+# ② 内环：目标 + 区间交给机器搜（setup 只跑一次；step/measure 共享 ns）
+#   ★ setup 里定义 apply(p)：op="export" 导出的脚本靠它复现最优参数（约定：无 apply 就只能手动用 BEST["params"]）
+#   blender_rt_loop(op="start", spec={
+#     "setup":   "import bpy\nob = bpy.data.objects['GEO-hull']\n"
+#                "def apply(p):\n"
+#                "    ob.location.y = p['dy_mm'] / 1000.0\n"
+#                "    ob.location.z = p['dz_mm'] / 1000.0\n"
+#                "    bpy.context.view_layer.update()\n",          # ★ 不刷依赖图 = 量的还是上一轮的几何
+#     "step":    "ns['params'] = {'dy_mm': random.uniform(-30, 30), 'dz_mm': random.uniform(-20, 20)}",
+#     "measure": "apply(ns['params'])\n"
+#                "ns['score'] = K.dsh_measure['silhouette_iou']("
+#                "  {'from':[0,-6,1.0], 'look_at':[0,0,0.5], 'lens':50}, 'D:/ref/side.png', None)\n"
+#                "ns['metrics'] = {'score': ns['score']}",
+#     "iterations": 400, "budget_ms": 60000, "measure_every": 1,
+#     "top_k": 10, "patience": 60, "interval": 0.0})
+#   ⇒ iterations + budget_ms 是安全阀（双上限，至少给一个）；跑飞了 op="stop" 下一个 tick 退出
+#   blender_rt_loop(op="status", history=12)                     # tps / best / 尾迹
+#   blender_rt_loop(op="board", limit=10)                        # 候选表：哪些参数、各自 score（比"一个最优值"信息量大）
+#   blender_rt_loop(op="export", path="D:/out/best_fit.py")       # best → 可复现脚本（内嵌 setup + apply(BEST)）
+```
+
+**现成的目标函数**（`K.dsh_measure`，比自写稳；要用它得让 `view.py` / `qc.py` 在会话里）：
+
+| 目标 | 签名 | 说明 |
+|---|---|---|
+| 轮廓相似 | `silhouette_iou(view_spec, ref_path, ref_box)` → `1-IoU` | 会渲染一张图再比对；**固定对齐**（防"缩放迁就轮廓"刷分）；`ref_box=None` = 自动取 |
+| 尺寸误差 | `aabb_err(obj_name, target_size)` → 三轴绝对误差和 | **不出图，最便宜**；适合反推长宽高 |
+| 剖面差 | `profile_err(view_spec, ref_path, ref_box, bins=24)` → 平均剖面差 px | 比 IoU 更严：逐层宽度都要贴 |
+
+**纪律（缺一条就会得到"看起来对"的错结论）**：
+
+1. **换通路复核**：内环只优化你写的 score。收敛后用**另一条通路**复算 —— `qc_render_views` 出同机位图 + `audit_measure` 量尺寸 + `blender_rt_see` 看一眼；别把 `op="board"` 的 best 当验收；
+2. **目标函数要防刷分**：单视轮廓 IoU 是必要不充分（轮廓填满就能刷高）→ 必须再配间隙 / 尺寸 / 特征线证据（§0.6.2）；
+3. **收敛后场景停在"最后一次迭代"的参数上，不是 best** —— 要用 best 就 `op="export"` 拿 `apply(BEST)`，或按 `board` 里 `best.params` 自己贴回去；
+4. **参数区分连续量与枚举量**：段数 / 布尔这类整数开关走 `random.choice([...])`，别和连续量塞进同一条 `uniform`；
+5. **改完 transform 必须 `bpy.context.view_layer.update()`**（§6.5.1 事故 2：不刷依赖图，量到的还是上一轮）。
+
+**更省事的路：声明式 `shape_search`（不想手写 setup/step/measure 时）**
+
+```python
+#   blender_rt_plan(op="shape_search", args={
+#     "objective": "silhouette_iou",          # silhouette_iou | profile_err | aabb_err
+#     "ref": "D:/ref/side.png",
+#     "view": {"from":[0,-6,1.0], "look_at":[0,0,0.5], "lens":50},
+#     "apply": "ob.location.y = p['dy_mm']/1000.0\n    bpy.context.view_layer.update()",
+#     "params": {"dy_mm": {"min": -30, "max": 30, "step": 5}, "dz_mm": {"min": -20, "max": 20, "step": 5}},
+#     "iterations": 300, "budget_ms": 60000, "top_k": 10, "export": "D:/out/best_fit.py"})
+#   → 自动选策略（组合少 → 穷举 grid；组合多 → 随机搜索），托管 start → 轮询 → board → export，
+#     跑完把场景落到 best（内环自己会停在"最后一次迭代"）；回执给 spec_echo / best / board / next_steps
+#   → 先 dry_run=true：只校验并回 spec（不启动内环、不需要 Blender 连着）
+```
+
+**与手写的分工**：`shape_search` 是同一条 runner 的声明式封装 —— **也只在 GUI 会话有效**、也要过写租约；
+要自定义 ns（`penalize` / `anneal` / `record`、多目标）或要 `group_key` 分批，就回到上面的手写 spec。
+
+**不该用它的时候**：只试 ≤5 组（`blender_rt_do` 自己循环更省事）；目标写不成一个数（审美判断归人 / 模型）；
+**无头批处理**（`blender -b` 下 timers 不触发 —— 直接在脚本里写有界 for 循环；纯 2D 轮廓拟合走 `shape_fit` / `vehicle_fit`，它们不渲染、快一个量级）。
+
 ## 4. 六条必踩的坑
 
 ### 4.0 六条坑怎么分流（P2-3：能机械判定的交给门，不能的写进 checklist）
@@ -1922,3 +1991,30 @@ headless / 独立进程量过再改（GUI 场景与插件均未改动）。
 2. 坑二的 `axis_overlap_mm` 段必须同时带"**仅当接口法线与世界轴一致且轴对齐盒适用**"这一前提与"**旋转接口沿接口局部坐标量真实表面**"；
 3. `grep -n "embed_mm" SKILL.md README.md` ⇒ **只余本行自身**（§13 的历史引用）；规范正文与 `README.md` 为 0（字段名统一为 `overlap_mm`）；
 4. `grep -n "隐藏交叠" SKILL.md README.md` ⇒ 坑二 / §0.5.3–0.5.5 / §6 门⑧ 齐备；未重跑几何、未动 `references/验收清单.md`、未动插件。
+
+## 14. 本次更新对照（v8 · 2026-10-05 · 内环入口补齐：让 `blender_rt_loop` 从"存在"变成"会被选中"）
+
+来源：复查"为什么建模 AI 从不调用 `blender_rt_loop`"。结论：工具可用（注册 / 路由 / 自测齐备，`stats.loops=0` 只是没人调），
+但**它从未进入模型的选择面** —— ① §0 路由表没有 rt_loop 行（改前全文 `rt_loop` / `内环` 命中数都是 **0**）；
+② 技能把 headless 标成"第一路径"，而无头下 `bpy.app.timers` **不触发**（cookbook §8 实测 0 次）⇒ 内环在推荐路径上物理不可用；
+③ 它自己的工具描述把门槛写成"≥20 次迭代才用"（自我否决）；④ 招牌用途（2D 轮廓拟合）已被 `shape_fit` / `vehicle_fit` 顶掉。
+本次只补**选择面**与**首次调用成本**：不动内环实现、不动插件、不重跑几何。
+
+| # | 原来 | 改成 | 落在哪 |
+|---|---|---|---|
+| 1 | §0「要做的事 → 用哪个工具」表 14 行里没有"参数搜索" | 新增一行：**参数搜索 / 拟合 / 反推尺寸 → `blender_rt_loop`**（含 `K.dsh_measure` 三目标、GUI-only 前提、board→export→换通路复核） | §0 表（`blender_rt_do` 行之后） |
+| 2 | 规范里没有"什么时候该交内环"的判据 | 新增**第四条硬规则**：目标可标量化 + 要试几十~几千组 ⇒ 不许手工拍参数 | §0.7 |
+| 3 | 内环用法只写在插件 README / cookbook 里（模型不读那些） | 新增 **Recipe 24**：可复制 spec（含 setup 里的 `apply(p)` 约定）+ 现成目标函数表 + 5 条纪律 + 不该用它的 3 种场景 | §3 配方（Recipe 23 之后） |
+| 4 | front-matter `description` 不提搜索 | 描述补"参数搜索内环"，配方计数 23 → 24 | front-matter |
+
+**怎么验（v8 · 纯文本检查）**：
+1. `grep -c "rt_loop" SKILL.md` ⇒ ≥ 4（§0 表 / §0.7 硬规则 / Recipe 24 / 本节）；`grep -c "Recipe 24" SKILL.md` ⇒ ≥ 2（§0 表引用 + 配方标题）；
+2. `grep -n "K.dsh_measure" SKILL.md` ⇒ Recipe 24 的目标函数表必须给全 `silhouette_iou` / `aabb_err` / `profile_err` 三条签名；
+3. Recipe 24 必须同时写明：**GUI-only（无头 timers 不触发）**、**board/export**、**收敛后换通路复核**、**场景停在最后一次迭代而非 best**；
+4. 配方编号 1–23 与 2a/2b/3b/6b 变体一个不变（本次只**追加** Recipe 24）；未改插件、未动 `references/验收清单.md`、未重跑几何。
+
+---
+
+**补记（同日 · 插件 v1.0.3）**：插件侧新增声明式入口 `blender_rt_plan(op="shape_search", args={objective, params, apply, …})` ——
+把 Recipe 24 的三段手写代码换成「目标 + 区间」，内部跑同一条内环（同样只在 GUI 会话有效、同样过写租约）。
+本节路由行与 Recipe 24 已给出两种写法的分工；`dry_run=true` 只校验并回 spec（不需要 Blender 连着）。
